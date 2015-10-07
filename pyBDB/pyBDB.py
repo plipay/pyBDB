@@ -10,21 +10,25 @@ from bsddb3 import db
 
 import config
 
-def withdb (dbname, fn, secondary_index_fns={}):
-   """Access to the datastore represented by dbname,
-   which is passed a higher-order function that does
-   the expected action (put/get/deleter/etc.)"""
-
+def get_db_handle(dbname, allow_duplicates):
    # open the db environment
    dbe = db.DBEnv()
    dbe.open(config.DATASTORE_FOLDER, db.DB_CREATE | db.DB_INIT_MPOOL | db.DB_INIT_LOCK)
 
    # open the specific datastore (db file) within the db environment
    thisDB = db.DB(dbe)
-   if len(secondary_index_fns) == 0:
-      # permit duplicates, but only in the absence of secondary indices
+   if allow_duplicates:
       thisDB.set_flags(db.DB_DUP | db.DB_DUPSORT)
    thisDB.open(config.dbfile(dbname), None, db.DB_BTREE, db.DB_CREATE)
+   return (thisDB, dbe)
+
+def withdb (dbname, fn, secondary_index_fns={}):
+   """Access to the datastore represented by dbname,
+   which is passed a higher-order function that does
+   the expected action (put/get/deleter/etc.)"""
+   # init db
+   # permit duplicates, but only in the absence of secondary indices
+   (thisDB, dbe) = get_db_handle(dbname, len(secondary_index_fns) == 0)
 
    # apply the secondary indices (if any)
    secondary_indices = {} # k=index name, v=index function
