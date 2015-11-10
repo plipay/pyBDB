@@ -10,7 +10,7 @@ from bsddb3 import db
 
 import config
 
-def get_db_handle(dbname, allow_duplicates):
+def get_db_handle(dbname, allow_duplicates, db_type):
    # open the db environment
    dbe = db.DBEnv()
    dbe.open(config.DATASTORE_FOLDER, db.DB_CREATE | db.DB_INIT_MPOOL | db.DB_INIT_LOCK)
@@ -19,7 +19,7 @@ def get_db_handle(dbname, allow_duplicates):
    thisDB = db.DB(dbe)
    if allow_duplicates:
       thisDB.set_flags(db.DB_DUP | db.DB_DUPSORT)
-   thisDB.open(config.dbfile(dbname), None, db.DB_BTREE, db.DB_CREATE)
+   thisDB.open(config.dbfile(dbname), None, db_type, db.DB_CREATE)
    return (thisDB, dbe)
 
 def withdb (dbname, fn, secondary_index_fns={}):
