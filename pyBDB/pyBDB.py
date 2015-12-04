@@ -10,6 +10,9 @@ from bsddb3 import db
 
 import config
 
+def has_key(db_obj, key):
+    return db_obj.has_key(key)
+
 def get_db_handle(dbname, allow_duplicates):
    # open the db environment
    dbe = db.DBEnv()
